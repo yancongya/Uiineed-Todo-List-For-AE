@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Card</title>
+    <style>
+        /* Added from about.html */
+        :root {
+            --primary-color: #6c5ce7; /* 紫色调 */
+            --text-primary: #2d3436; /* 主要文本深灰色 */
+            --text-dimmed: #b2bec3;  /* 变暗文本浅灰色 */
+            --text-secondary: #636e72; /* 次要文本灰色 */
+            --icon-color: #b2bec3;    /* 图标默认色 */
+            --icon-hover-color: #2d3436; /* 图标悬停色 */
+            --bg-color: #f8f9fa;      /* 背景浅灰 */
+            --card-bg: #ffffff;      /* 卡片白色 */
+            --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* 更柔和的阴影 */
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* End Added */
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0; /* Light grey background for contrast */
+            margin: 0;
+            /* Adopted font from about.html */
+            font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, \'Helvetica Neue\', sans-serif;
+        }
+
+        .card {
+            width: 280px;
+            height: 280px;
+            background: white;
+            /* Default: top-left, top-right, bottom-right, bottom-left */
+            border-radius: 32px 32px 22px 22px; /* Smaller bottom roundness by default */
+            padding: 3px; /* Creates the thin border effect */
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Neutral grey shadow */
+            transition: all 0.5s ease-in-out;
+            overflow: hidden; /* Hide overflowing content */
+            border: 2px solid var(--text-secondary); /* Added outer stroke using CSS variable */
+        }
+
+        .card:hover {
+            /* Hover: top-left, top-right, bottom-right, bottom-left */
+            border-radius: 55px 32px 32px 55px; /* Bottom-left matches top-left, bottom-right recovers */
+        }
+
+        
+
+        .icons .icon {
+             width: 30px;
+             height: 30px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .icons .icon:hover {
+            transform: scale(2) translateY(-5px);
+        }
+
+
+        .card .profile-pic {
+            position: absolute;
+            width: calc(100% - 6px); /* Takes padding into account */
+            height: calc(100% - 6px);
+            top: 3px;
+            left: 3px;
+            border-radius: 29px; /* Match inner rounding */
+            z-index: 1;
+            border: 0px solid transparent; /* Was #fbb9b6 - not visible by default, but changed for consistency */
+            overflow: hidden;
+            transition: all 0.5s ease-in-out 0.2s, z-index 0.5s ease-in-out 0.2s;
+            background-color: var(--card-bg); /* Was #fff8f6 */
+        }
+
+        .card:hover .profile-pic {
+            width: 100px;
+            height: 100px;
+            /* aspect-ratio: 1; Remove if setting width/height explicitly */
+            top: 10px;
+            left: 10px;
+            border-radius: 50%; /* Make it circular */
+            z-index: 3;
+            border: 7px solid var(--text-secondary); /* Was #fbb9b6 */
+            box-shadow: 0 3px 3px rgba(0,0,0,0.1); /* Was rgba(96, 75, 74, 0.188) 0px 5px 5px 0px */
+            transition: all 0.5s ease-in-out, z-index 0.5s ease-in-out 0.1s;
+        }
+
+         /* Style for the image inside profile-pic */
+        .card .profile-pic img {
+            display: block; /* Remove extra space below image */
+            width: 100%;
+            
+            object-fit: cover; /* Maintain aspect ratio */
+            transform-origin: center center; /* Zoom origin - center is usually better for images */
+            transition: all 0.5s ease-in-out 0s;
+             transform: scale(1.0); /* Initial scale */
+        }
+
+        .card:hover .profile-pic img {
+            transform: scale(1.25); /* Zoom in on hover - adjust scale as needed */
+            transition: all 0.5s ease-in-out 0.5s; /* Delay zoom */
+        }
+
+        .card .bottom {
+            position: absolute;
+            bottom: 3px; /* Outer padding */
+            left: 3px;   /* Outer padding */
+            right: 3px;  /* Outer padding */
+            background: var(--text-primary); /* Was #fbb9b6 */
+            top: 86%; /* Slightly increase height for better default radius */
+            border-radius: 19px; /* Default: matches card's new default bottom inner curve (22px-3px) */
+            z-index: 2;
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 5px 5px 0px inset; /* Was rgba(96, 75, 74, 0.188) inset */
+            overflow: hidden;
+            transition: top 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0s, border-radius 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0s;
+        }
+
+        .card:hover .bottom {
+            top: 20%; /* Expand upwards */
+            /* Hover: top-left, top-right, bottom-right, bottom-left */
+            border-radius: 52px 29px 29px 52px; /* Match card's hover inner curve */
+            padding-top: 78px;  /* Space for overlaid profile picture */
+            transition: top 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.2s, border-radius 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.2s, padding-top 0.5s cubic-bezier(0.645, 0.045, 0.355, 1) 0.2s;
+        }
+
+        .card .bottom .content {
+            position: absolute;
+            top: 0; /* Fill parent .bottom vertically */
+            bottom: 0; /* Fill parent .bottom vertically */
+            left: 1.5rem;
+            right: 1.5rem;
+            /* color: white; Replaced by CSS Variables */
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease-in-out 0.4s, transform 0.3s ease-in-out 0.4s, padding-top 0.3s ease-in-out 0.4s, padding-bottom 0.3s ease-in-out 0.4s; /* Add padding to transition */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* Padding will be applied on hover to position text */
+            /* Prevent text selection */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .card:hover .bottom .content {
+            opacity: 1;
+            transform: translateY(0);
+            padding-top: 80px;  /* Space for overlaid profile picture, adjusted */
+            padding-bottom: 30px; /* Increased bottom padding for more space above icons */
+            justify-content: flex-start; /* Align content (email title + description) to the top */
+        }
+
+        .card .bottom .content .name {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            /* Clean up any previously misinterpreted flex properties */
+        }
+
+        .card .bottom .content .about-me {
+            display: block;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            text-align: center;
+            /* Clean up any previously misinterpreted flex properties */
+        }
+
+        .card .bottom .bottom-bottom {
+            position: absolute; /* Keep absolute positioning */
+            bottom: 0.3rem; /* Adjusted for vertical centering in default short bar */
+            left: 1.5rem;
+            right: 1.5rem;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: bottom 0.3s ease-in-out 0.2s; /* Add delay to match bottom expansion */
+            /* Container for the new icons */
+        }
+
+        .card:hover .bottom .bottom-bottom {
+            bottom: 1rem;      /* Position at the bottom on hover */
+            /* left/right/justify are inherited or set in the base rule */
+            /* justify-content will still be center from its own rule */
+        }
+
+        .card .bottom .bottom-bottom .social-links-container {
+            display: flex;
+            gap: 0.8rem; /* Adjusted gap */
+        }
+
+        .card .bottom .bottom-bottom .social-links-container svg {
+            height: 20px;
+            width: 20px; /* Ensure width is also set */
+            fill: white;
+            filter: drop-shadow(0 3px 3px rgba(165, 132, 130, 0.133)); /* Slightly adjusted shadow */
+            transition: all 0.3s ease;
+        }
+
+        .card .bottom .bottom-bottom .social-links-container a:hover svg { /* Target link hover */
+            fill: #f55d56;
+            transform: scale(1.2);
+        }
+
+        .card .bottom .bottom-bottom .button {
+            background: white;
+            color: #fbb9b6;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.7rem; /* Slightly larger */
+            padding: 0.5rem 0.8rem; /* Adjusted padding */
+            box-shadow: rgba(165, 132, 130, 0.133) 0px 3px 3px 0px; /* Slightly adjusted shadow */
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .card .bottom .bottom-bottom .button:hover {
+            background: #f55d56;
+            color: white;
+            transform: scale(1.05); /* Add slight scale effect */
+        }
+
+        /* Added from about.html */
+        .email-container {
+            /* margin-bottom: 1rem; */ /* Maybe remove margin if spacing handled by parent */
+            width: 100%; /* Ensure container takes width for centering */
+            display: flex; /* Use flex here too for centering .email */
+            justify-content: center;
+        }
+
+        .email {
+            font-size: 1.2rem; /* Adjusted size for card */
+            /* color: var(--text-primary); */ /* Replaced by specific color below */
+            white-space: nowrap;
+            letter-spacing: 0.08em;
+            display: inline-flex; /* Change to inline-flex to wrap content */
+            justify-content: center;
+            align-items: baseline;
+            /* Ensure text color is visible against pink bg */
+            color: #ffffff; /* Default to white */
+        }
+
+        .tycon-container, .domain-container {
+            display: inline-flex; /* Keep them inline */
+            position: relative; /* Needed for absolute positioning of children */
+            vertical-align: baseline; /* Align based on text */
+        }
+
+        .tycon-container {
+             /* margin-right: 0.1em; */ /* Keep no margin for continuous text */
+        }
+
+        .tycon, .domain {
+            display: inline-block;
+            padding: 0;
+            transition: color 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Added opacity to transition for domain dimming */
+            position: relative;
+            font-weight: 500;
+            color: inherit; /* Inherit color from .email */
+        }
+
+        /* Underline base styles for BOTH parts */
+        .tycon::after, .domain::after {
+             display: none !important; /* Disable old underlines */
+        }
+
+        /* Classes to activate underlines */
+        /* .tycon.underline-active::after, */
+        /* .domain.underline-domain-active::after { */
+        /*     transform: scaleX(1); */
+        /* } */
+
+        /* Highlight style - only color */
+        .text-highlight {
+            /* color: var(--primary-color); */
+             color: var(--primary-color); /* Highlight with purple */
+             opacity: 1; /* Ensure full opacity */
+             /* Or maybe a darker pink: #f55d56 */
+        }
+
+        /* Dimmed style - color + opacity */
+        .text-dimmed {
+            /* color: var(--text-dimmed); */
+            /* opacity: 0.7; /* Make less dim on pink */
+            color: var(--text-dimmed); /* Dimmed with grey */
+            opacity: 0.6; /* Match about.html opacity */
+        }
+
+        /* Hover Label Style (Common for all label spans) */
+        .hover-label {
+            position: absolute;
+            top: 100%; /* Position top edge at the bottom of the wrapper */
+            margin-top: 6px; /* Push it down below the wrapper/underline */
+            /* left: is set by JS */
+            transform: translateX(-50%); /* Center based on JS \'left\' value */
+            font-size: 0.8rem;
+            color: #ffffff; /* Make label text visible */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, left 0.2s ease-out; /* Added \'left\' to transition */
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* Add shadow for visibility */
+        }
+
+
+        .hover-label.active {
+            opacity: 1;
+        }
+
+        .icons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem; /* Increased gap */
+            /* margin-top: 1.5rem; */ /* Remove margin-top, positioning handled by .bottom-bottom */
+            width: 100%; /* Ensure icons container takes width */
+        }
+
+        /* Style for the copy success message */
+        .copy-success-message {
+            position: absolute; /* Position relative to card */
+            bottom: 50px; /* Adjusted from 65px to move it down */
+            left: 0;
+            right: 0;
+            font-size: 0.8rem;
+            color: #4CAF50; /* Green */
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            text-align: center;
+            pointer-events: none; /* Prevent interaction */
+            z-index: 5; /* Ensure above other elements */
+             background-color: transparent; /* Removed background */
+             padding: 0.2em 0.5em;
+             border-radius: 4px;
+             display: inline-block; /* Fit content */
+             width: auto;
+             margin: 0 auto; /* Center inline-block */
+        }
+
+        .copy-success-message.visible {
+            opacity: 1;
+        }
+
+        .icons .icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .icons .icon:hover {
+            transform: scale(1.15);
+        }
+
+        /* Hide old text elements */
+        .small-text { display: none; }
+
+        .email-text-wrapper {
+            display: inline-flex; /* Use flex to align inner spans */
+            position: relative; /* Context for absolute underlines */
+            vertical-align: baseline;
+            white-space: nowrap; /* Prevent inner spans from wrapping */
+        }
+
+        .text-segment {
+            display: inline; /* Flow like text */
+            vertical-align: baseline;
+            transition: color 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            font-weight: 500;
+            /* color: inherit; */ /* REMOVE this line to allow highlight/dim classes to take effect */
+        }
+
+        .tycon { /* Keep ID selector for JS */ }
+        .domain-at { /* Style the @ symbol if needed */ }
+                        .domain-user {
+            display: inline-block;
+            position: relative;
+            vertical-align: bottom;
+            height: 1.2em;
+            overflow: hidden;
+        }
+
+        .domain-user::before {
+            content: attr(data-sizer);
+            display: block;
+            visibility: hidden;
+            white-space: nowrap;
+        }
+
+        .scroll-text-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.4s ease-in-out;
+            transform: translateY(0);
+        }
+
+        .scroll-text-item {
+            display: block;
+            height: 1.2em;
+            line-height: 1.2em;
+        }
+
+                .scroll-text-item {
+            display: block;
+            height: 1.2em;
+            line-height: 1.2em;
+        }
+
+        .domain-user.scroll-up .scroll-text-wrapper {
+            transform: translateY(-1.2em);
+        }
+        .domain-suffix { /* Keep ID selector for JS */ }
+
+        /* Remove ::after based underlines */
+        /* .email-text-wrapper::after, .tycon::after, .domain::after { */
+        /*      display: none !important; */
+        /* } */
+
+        /* Base style for ALL underline divs */
+        .underline {
+            position: absolute;
+            bottom: -4px; /* Position below baseline */
+            height: 2px;
+            background-color: var(--primary-color); /* Underline with purple */
+            transform: scaleX(0); /* Initially hidden */
+            transform-origin: center;
+            transition: transform 0.3s ease-in-out;
+            left: 0;
+            width: 0;
+        }
+
+        /* Placeholder positioning - REQUIRES JS */
+        #tycon-underline { }
+        #full-underline { }
+        #domain-part-underline { }
+        #at-user-underline { }
+
+        /* Class to make underlines visible */
+        .underline.visible {
+            transform: scaleX(1);
+        }
+        /* End Added */
+
+        /* Styling for the new description text */
+        .card-description {
+            font-size: 0.9rem;
+            color: #cccccc; /* Light grey text */
+            line-height: 1.4;
+            text-align: center;
+            margin-top: 2rem; /* Increased space below the email title to avoid label overlap */
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+            /* Opacity and transform are handled by the parent .content animations */
+        }
+
+        /* Styling for the QR Code Image */
+        .qr-code-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 75%; /* Adaptive width */
+            max-height: 75%; /* Adaptive height */
+            width: auto; /* Maintain aspect ratio */
+            height: auto; /* Maintain aspect ratio */
+            object-fit: contain;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+            z-index: 100; /* Ensure it's on top */
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+            pointer-events: none; /* Initially not interactive */
+        }
+
+        .qr-code-image.visible {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease-in-out, visibility 0s linear 0s;
+            pointer-events: auto; /* Interactive when visible */
+        }
+
+        /* Name in top-right corner */
+        .card-owner-name {
+            position: absolute;
+            top: 18px; /* Back to original top for white area */
+            right: 20px; /* Horizontal position */
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary); /* Dark text for white background */
+            opacity: 0;
+            transform: translateY(-15px) scale(0.9); /* Initial state: hidden and slightly up/small */
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            transition-delay: 0s; /* For exit */
+            z-index: 5; /* Ensure it's above general content but potentially below modals like QR */
+            pointer-events: none; /* Not interactive itself */
+            overflow: hidden; /* Important for shimmer pseudo-element */
+        }
+
+        .card:hover .card-owner-name {
+            opacity: 1;
+            transform: translateY(0) scale(1); /* Visible state */
+            transition-delay: 0.4s; /* Delay entrance until card is mostly expanded */
+        }
+
+        /* Shimmer animation keyframes */
+        @keyframes shimmer-effect {
+            0% {
+                left: -110%; /* Start off-screen to the left */
+            }
+            40% { 
+                left: 110%; /* Move across and off-screen to the right */
+            }
+            100% {
+                left: 110%; /* Stay off-screen right */
+            }
+        }
+
+        /* Shimmer pseudo-element */
+        .card-owner-name::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 70%; /* Width of the shimmer gradient */
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.8), /* Bright white shimmer for dark text */
+                transparent
+            );
+            transform: skewX(-25deg); /* Angle the shimmer */
+            left: -110%; /* Default position of shimmer, off-screen */
+        }
+
+        .card:hover .card-owner-name::after {
+            animation-name: shimmer-effect;
+            animation-duration: 2s; /* Duration of one shimmer pass */
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: 1; /* Play once per hover */
+            animation-delay: 0.9s; 
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <span class="card-owner-name">itycon</span>
+    <div class="profile-pic">
+        <!-- Profile animated WebP -->
+        <img src="public/coming.webp" alt="Profile Animation">
+    </div>
+    <div class="bottom">
+        <div class="content">
+             <!-- Replaced Name/About with Email structure -->
+            <div class="email-container">
+                <div class="email">
+                    <span class="email-text-wrapper" id="email-text-wrapper">
+                        <span class="text-segment tycon" id="tycon">tycon3</span>
+                        <span class="text-segment domain-at" id="domain-at">@</span>
+                        <span class="text-segment domain-user" id="domain-user" data-sizer="itycon"><span class="scroll-text-wrapper"><span class="scroll-text-item">itycon</span><span class="scroll-text-item">烟囱鸭</span></span></span>
+                        <span class="text-segment domain-suffix" id="domain-suffix">.cn</span>
+                        <!-- Underline elements -->
+                        <div class="underline" id="tycon-underline"></div>
+                        <div class="underline" id="full-underline"></div>
+                        <div class="underline" id="domain-part-underline"></div>
+                        <div class="underline" id="at-user-underline"></div>
+                        <!-- Hover Labels (one for each icon\'s hover state) -->
+                        <span class="hover-label" id="label-wechat">微信号</span>
+                        <span class="hover-label" id="label-mail">邮箱</span>
+                        <span class="hover-label" id="label-link">网站</span>
+                        <span class="hover-label" id="label-book">小红书账号</span>
+                    </span>
+                </div>
+            </div>
+            <p class="card-description">一个喜欢捣鼓的动效设计师</p>
+        </div>
+        <div class="bottom-bottom">
+            <!-- Replaced Social Icons with new Icons structure -->
+             <div class="icons">
+                <img class="icon" id="wechat-icon" src="public/wechat.png" data-static="public/wechat.png" data-animated="public/wechat.webp" alt="WeChat icon">
+                <img class="icon" id="mail-icon" src="public/mail.png" data-static="public/mail.png" data-animated="public/mail.webp" alt="Mail icon">
+                <img class="icon" id="link-icon" src="public/link.png" data-static="public/link.png" data-animated="public/link.webp" alt="Link icon">
+                <img class="icon" id="book-icon" src="public/book.png" data-static="public/book.png" data-animated="public/book.webp" alt="Book icon">
+            </div>
+        </div>
+    </div>
+     <!-- Added copy success message -->
+     <div class="copy-success-message" id="copy-success-message">已复制</div>
+     <!-- Added WeChat QR Code Image -->
+     <img src="public/wechat_qrcode.jpg" alt="WeChat QR Code" id="wechat-qr-image" class="qr-code-image">
+</div>
+
+ <!-- Added JavaScript from about.html -->
+ <script>
+    // Timer ID for copy message fade out
+    let copyMessageTimeoutId = null;
+
+    // Function to show and fade out the copy success message
+    function showCopySuccessMessage() {
+        const messageElement = document.getElementById('copy-success-message');
+        if (!messageElement) return;
+        if (copyMessageTimeoutId) clearTimeout(copyMessageTimeoutId);
+        messageElement.classList.add('visible');
+        copyMessageTimeoutId = setTimeout(() => {
+            messageElement.classList.remove('visible');
+            copyMessageTimeoutId = null;
+        }, 800);
+    }
+
+    // Function to handle the actual text copying and trigger feedback
+    function copyTextAndFeedback(textToCopy) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showCopySuccessMessage();
+        }).catch(err => {
+            console.error('无法复制文本: ', err);
+        });
+    }
+
+    // --- Advanced Interaction Setup ---
+    function setupAdvancedInteraction(iconId, config) {
+        const icon = document.getElementById(iconId);
+        const wrapperElement = document.getElementById('email-text-wrapper');
+
+        // Animated icon logic
+        const staticSrc = icon.getAttribute('data-static');
+        const animatedSrc = icon.getAttribute('data-animated');
+
+        icon.addEventListener('mouseenter', () => {
+            if (animatedSrc) icon.src = animatedSrc;
+        });
+
+        icon.addEventListener('mouseleave', () => {
+            if (staticSrc) icon.src = staticSrc;
+        });
+
+        // Get references to text segments and underline divs
+        const elements = {
+            tycon: document.getElementById('tycon'),
+            domainAt: document.getElementById('domain-at'),
+            domainUser: document.getElementById('domain-user'),
+            domainSuffix: document.getElementById('domain-suffix'),
+            tyconUnderline: document.getElementById('tycon-underline'),
+            fullUnderline: document.getElementById('full-underline'),
+            domainPartUnderline: document.getElementById('domain-part-underline'),
+            atUserUnderline: document.getElementById('at-user-underline'),
+        };
+        // Get all potential labels (needed for reset)
+        const allLabels = wrapperElement.querySelectorAll('.hover-label');
+
+        // Combine text segments and underlines for easier reset
+        const textAndUnderlines = { ...elements };
+
+        // Basic validation - check icon, wrapper, and if *any* label exists
+        if (!icon || !wrapperElement || !allLabels.length || Object.values(elements).some(el => !el)) {
+            console.warn(`Core elements missing for icon setup: ${iconId}. Check wrapper, text spans, underlines, and existence of at least one .hover-label.`);
+            return;
+        }
+        // Get the specific label for this interaction
+        const targetLabelElement = document.getElementById(config.labelId);
+        if (!targetLabelElement) {
+             console.warn(`Target label element with ID ${config.labelId} not found for icon ${iconId}.`);
+             // Decide if interaction should proceed without label or return
+             // return;
+        }
+
+        // --- Underline Positioning Function (remains the same) ---
+        let initialPositioningDone = false;
+        function positionUnderlines() {
+            try {
+                // Ensure elements exist before accessing properties
+                if (!elements.tycon || !elements.tyconUnderline) return;
+                elements.tyconUnderline.style.left = `${elements.tycon.offsetLeft}px`;
+                elements.tyconUnderline.style.width = `${elements.tycon.offsetWidth}px`;
+
+                if (!elements.fullUnderline) return;
+                elements.fullUnderline.style.left = `0`;
+                elements.fullUnderline.style.width = `${wrapperElement.offsetWidth}px`; // Use wrapper width
+
+                if (!elements.domainUser || !elements.domainSuffix || !elements.domainPartUnderline) return;
+                const domainPartLeft = elements.domainUser.offsetLeft;
+                const domainPartWidth = elements.domainUser.offsetWidth + elements.domainSuffix.offsetWidth;
+                elements.domainPartUnderline.style.left = `${domainPartLeft}px`;
+                elements.domainPartUnderline.style.width = `${domainPartWidth}px`;
+
+                if (!elements.domainAt || !elements.domainUser || !elements.atUserUnderline) return;
+                const atUserLeft = elements.domainAt.offsetLeft;
+                const atUserWidth = elements.domainAt.offsetWidth + elements.domainUser.offsetWidth;
+                elements.atUserUnderline.style.left = `${atUserLeft}px`;
+                elements.atUserUnderline.style.width = `${atUserWidth}px`;
+
+                initialPositioningDone = true;
+            } catch (e) {
+                 console.error("Error positioning underlines:", e);
+            }
+        }
+        const ensurePositioning = () => {
+            // Use requestAnimationFrame for better timing after layout changes
+             requestAnimationFrame(() => {
+                if (!initialPositioningDone) {
+                    positionUnderlines();
+                    // Re-check in case initial positioning was slightly off due to transitions
+                    setTimeout(positionUnderlines, 50); 
+                }
+             });
+        };
+         // Call positionUnderlines initially after a delay and on resize
+         setTimeout(ensurePositioning, 200); // Increased delay
+         window.addEventListener('resize', () => {
+            initialPositioningDone = false; // Reset flag on resize
+            ensurePositioning();
+         });
+
+
+        // --- Event Listeners ---
+        icon.addEventListener('mouseover', () => {
+            ensurePositioning();
+
+            // 1. Reset all text/underline styles
+            Object.values(textAndUnderlines).forEach(el => {
+                if (el) el.classList.remove('text-highlight', 'text-dimmed', 'visible');
+            });
+            // Hide all labels
+            allLabels.forEach(label => label.classList.remove('active'));
+
+            // 2. Apply styles based on config
+            // Apply text highlight/dim
+            (config.highlight || []).forEach(key => elements[key]?.classList.add('text-highlight'));
+            (config.dim || []).forEach(key => elements[key]?.classList.add('text-dimmed'));
+
+            // Apply underline visibility
+            (config.showUnderlines || []).forEach(key => elements[key]?.classList.add('visible'));
+
+            // Position and show the target label
+            if (targetLabelElement && config.labelId) {
+                const activeUnderlineKey = (config.showUnderlines || [])[0];
+                const activeUnderlineElement = elements[activeUnderlineKey];
+
+                if (activeUnderlineElement && initialPositioningDone) { // Ensure positioning ran
+                    const underlineLeft = activeUnderlineElement.offsetLeft;
+                    const underlineWidth = activeUnderlineElement.offsetWidth;
+                    const labelLeft = underlineLeft + (underlineWidth / 2); // Center calculation
+
+                    targetLabelElement.style.left = `${labelLeft}px`;
+                    targetLabelElement.classList.add('active'); // Show the label
+                } else {
+                     // Fallback if no specific underline or positioning failed
+                     targetLabelElement.style.left = '50%';
+                     targetLabelElement.classList.add('active');
+                }
+            }
+        });
+
+        icon.addEventListener('mouseout', () => {
+            // Reset all text/underline styles
+             Object.values(textAndUnderlines).forEach(el => {
+                if (el) el.classList.remove('text-highlight', 'text-dimmed', 'visible');
+            });
+            // Hide all labels
+            allLabels.forEach(label => {
+                label.classList.remove('active');
+                // Optional: Reset left style?
+                // label.style.left = '50%'; // Or remove the style attribute
+            });
+        });
+
+        // Click handler remains the same
+        icon.addEventListener('click', () => {
+             if (config.textToCopyProvider) {
+                const textToCopy = config.textToCopyProvider();
+                copyTextAndFeedback(textToCopy);
+            } else {
+                 console.warn("No textToCopyProvider defined for icon:", iconId);
+            }
+        });
+    }
+
+    // --- Initialize Interactions on DOMContentLoaded ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Define configurations for each icon, adding labelId
+        const configs = {
+            wechat: {
+                labelId: 'label-wechat',
+                highlight: ['tycon'],
+                dim: ['domainAt', 'domainUser', 'domainSuffix'],
+                showUnderlines: ['tyconUnderline'],
+                // Get element directly inside provider
+                textToCopyProvider: () => document.getElementById('tycon')?.textContent || ''
+            },
+            mail: {
+                labelId: 'label-mail',
+                highlight: ['tycon', 'domainAt', 'domainUser', 'domainSuffix'],
+                dim: [],
+                showUnderlines: ['fullUnderline'],
+                // Use fixed original text values instead of reading DOM
+                textToCopyProvider: () => 'tycon3@itycon.cn'
+            },
+            link: {
+                labelId: 'label-link',
+                highlight: ['domainUser', 'domainSuffix'],
+                dim: ['tycon', 'domainAt'],
+                showUnderlines: ['domainPartUnderline'],
+                // Use fixed original text values instead of reading DOM
+                textToCopyProvider: () => 'itycon.cn'
+            },
+            book: {
+                labelId: 'label-book',
+                highlight: ['domainAt', 'domainUser'],
+                dim: ['tycon', 'domainSuffix'],
+                showUnderlines: ['atUserUnderline'],
+                 // Get elements directly inside provider - check state for different copy behavior
+                textToCopyProvider: () => {
+                    if (window.bookIconState === 1) {
+                        // Bilibili state
+                        return 'https://space.bilibili.com/100881808';
+                    } else if (window.bookIconState === 2) {
+                        // Aifadian state
+                        return 'https://afdian.tv/a/tycon';
+                    }
+                    // Default: Xiaohongshu state
+                    return 'https://www.xiaohongshu.com/user/profile/5c009931f7e8b962bb328c6d';
+                }
+            }
+        };
+
+        // Setup each icon
+        setupAdvancedInteraction('wechat-icon', configs.wechat);
+        setupAdvancedInteraction('mail-icon', configs.mail);
+        setupAdvancedInteraction('link-icon', configs.link);
+        setupAdvancedInteraction('book-icon', configs.book);
+
+        // WeChat QR Code Interaction
+        const wechatIcon = document.getElementById('wechat-icon');
+        const qrImage = document.getElementById('wechat-qr-image');
+
+        if (wechatIcon && qrImage) {
+            wechatIcon.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent interference with other click listeners
+                qrImage.classList.toggle('visible');
+            });
+
+            wechatIcon.addEventListener('mouseleave', () => {
+                if (qrImage.classList.contains('visible')) {
+                    qrImage.classList.remove('visible');
+                }
+            });
+
+            // Optional: Click the QR code itself to hide it
+            qrImage.addEventListener('click', () => {
+                qrImage.classList.remove('visible');
+            });
+        }
+
+        // Book Icon Text Scroll Interaction with State Management
+        const bookIcon = document.getElementById('book-icon');
+        const domainUser = document.getElementById('domain-user');
+        const cardDescription = document.querySelector('.card-description');
+        const profileImg = document.querySelector('.profile-pic img');
+        
+        // State management for book icon (global for access in textToCopyProvider)
+        window.bookIconState = 0; // 0: xiaohongshu (book group), 1: bilibili group, 2: aifadian group
+        
+        if (bookIcon && domainUser && cardDescription) {
+            // Enhanced hover logic for book icon with state-aware animation
+            bookIcon.addEventListener('mouseenter', () => {
+                domainUser.classList.add('scroll-up');
+                
+                // Show animated version based on current state
+                if (window.bookIconState === 0) {
+                    // Xiaohongshu state: show book animation
+                    bookIcon.src = 'public/book.webp';
+                } else if (window.bookIconState === 1) {
+                    // Bilibili state: show bilibili animation
+                    bookIcon.src = 'public/bilibili.webp';
+                } else if (window.bookIconState === 2) {
+                    // Aifadian state: show aifadian animation
+                    bookIcon.src = 'public/aifadian.webp';
+                }
+            });
+
+            bookIcon.addEventListener('mouseleave', () => {
+                domainUser.classList.remove('scroll-up');
+                
+                // Return to static version based on current state
+                if (window.bookIconState === 0) {
+                    // Xiaohongshu state: show book static
+                    bookIcon.src = 'public/book.png';
+                } else if (window.bookIconState === 1) {
+                    // Bilibili state: show bilibili static
+                    bookIcon.src = 'public/bilibili.png';
+                } else if (window.bookIconState === 2) {
+                    // Aifadian state: show aifadian static
+                    bookIcon.src = 'public/aifadian.png';
+                }
+            });
+            
+            // Enhanced click handler for state switching (3-state cycle)
+            bookIcon.addEventListener('click', (event) => {
+                event.stopPropagation();
+                
+                // Cycle through states: 0 (xiaohongshu) -> 1 (bilibili) -> 2 (aifadian) -> 0
+                window.bookIconState = (window.bookIconState + 1) % 3;
+                
+                // Trigger text scroll animation
+                domainUser.classList.add('scroll-up');
+                
+                let iconSrc, labelText, userText, copyLink;
+                
+                if (window.bookIconState === 0) {
+                    // Xiaohongshu state
+                    iconSrc = 'public/book.webp';
+                    labelText = '小红书账号';
+                    userText = '烟囱鸭';
+                    copyLink = 'https://www.xiaohongshu.com/user/profile/5c009931f7e8b962bb328c6d';
+                } else if (window.bookIconState === 1) {
+                    // Bilibili state
+                    iconSrc = 'public/bilibili.webp';
+                    labelText = 'B站账号';
+                    userText = '烟囱鸭';
+                    copyLink = 'https://space.bilibili.com/100881808';
+                } else {
+                    // Aifadian state
+                    iconSrc = 'public/aifadian.webp';
+                    labelText = '爱发电账号';
+                    userText = 'itycon';
+                    copyLink = 'https://afdian.tv/a/tycon';
+                }
+                
+                // Change icon immediately
+                bookIcon.src = iconSrc;
+                
+                // Update text content immediately and after animation
+                const scrollTextItems = domainUser.querySelectorAll('.scroll-text-item');
+                const bookLabel = document.getElementById('label-book');
+                
+                // Update both text items immediately to ensure consistency
+                if (scrollTextItems.length >= 2) {
+                    scrollTextItems[0].textContent = userText;
+                    scrollTextItems[1].textContent = userText;
+                }
+                
+                // Update label immediately
+                if (bookLabel) {
+                    bookLabel.textContent = labelText;
+                }
+                
+                // After animation, remove scroll class to show updated text
+                setTimeout(() => {
+                    domainUser.classList.remove('scroll-up');
+                }, 200);
+                
+                // Copy corresponding link
+                copyTextAndFeedback(copyLink);
+            });
+            
+            // Profile image remains fixed and unchanged
+        }
+
+         // Ensure underlines are positioned initially after dynamic content might settle
+         setTimeout(() => {
+             const event = new Event('mouseover'); // Simulate mouseover on one icon to trigger positioning
+             const firstIcon = document.getElementById('wechat-icon');
+             if(firstIcon) {
+                 firstIcon.dispatchEvent(event);
+                 // Immediately dispatch mouseout to reset styles but keep positions calculated
+                 const outEvent = new Event('mouseout');
+                 firstIcon.dispatchEvent(outEvent);
+             }
+         }, 300); // Delay slightly more
+    });
+
+ </script>
+</body>
+</html>
